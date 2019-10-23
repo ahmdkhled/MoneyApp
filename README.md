@@ -71,6 +71,8 @@ If a user selects one of those accounts, they should then be taken to this scree
 		Data Binding
 		Retrofit
 		GsonParsing
+		Rxjava 
+		RxAndroid
 		Lottie 
 		
 
