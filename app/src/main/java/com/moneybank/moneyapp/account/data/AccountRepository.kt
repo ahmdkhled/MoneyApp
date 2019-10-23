@@ -1,0 +1,72 @@
+package com.moneybank.moneyapp.account.data
+
+import com.moneybank.moneyapp.account.model.AccountDetailDTO
+import com.moneybank.moneyapp.account.model.ProductResponse
+import com.moneybank.moneyapp.api.RetrofitSingleton
+import com.moneybank.moneyapp.api.enqueueOn
+import com.moneybank.moneyapp.api.failure
+import com.moneybank.moneyapp.api.success
+import com.moneybank.moneyapp.application.MiniMoneyBoxApplication
+
+
+/**
+ * [AccountRepository] :
+ *
+ *
+ * @author Rucha Bhatt
+ * @version 1.0.0
+ * @since 23-10-2019
+ */
+class AccountRepository private constructor() {
+    object HOLDER {
+        val obj = AccountRepository()
+    }
+
+    companion object {
+        @JvmStatic
+        val instance: AccountRepository = HOLDER.obj
+    }
+
+    private val mApiService by lazy {
+        return@lazy RetrofitSingleton.getInstance().provideApiService()
+    }
+
+    fun getAccountDetails( onAccountCallback: (AccountDetailDTO?) -> Unit) {
+        if (MiniMoneyBoxApplication.isNetworkConnected()) {
+            mApiService.getAccountDetail().enqueueOn().success { _, response ->
+                when {
+                    response.isSuccessful && response.code() == 200 -> {
+                        onAccountCallback(response.body())
+                    }
+                    else -> {
+                        onAccountCallback(response.body())
+                    }
+                }
+            } failure { _, t ->
+                onAccountCallback(null)
+            }
+        }
+    }
+
+    fun oneoffPayment(amount:Long,investorProductId:Int, onPaymentCallback: (ProductResponse?) -> Unit) {
+        if (MiniMoneyBoxApplication.isNetworkConnected()) {
+            val map = HashMap<String, Any>().apply {
+                this["Amount"] = amount
+                this["InvestorProductId"] = investorProductId
+            }
+            mApiService.offPayment(map).enqueueOn().success { _, response ->
+                when {
+                    response.isSuccessful && response.code() == 200 -> {
+                        onPaymentCallback(response.body())
+                    }
+                    else -> {
+                        onPaymentCallback(response.body())
+                    }
+                }
+            } failure { _, t ->
+                onPaymentCallback(null)
+            }
+        }
+    }
+
+}
